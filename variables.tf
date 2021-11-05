@@ -4,6 +4,11 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "prefix" {
+  type        = string
+  description = "The subdomain prefix to use for the static site"
+}
+
 variable "site_domain" {
   type        = string
   description = "The domain name to use for the static site"

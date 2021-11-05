@@ -4,23 +4,17 @@ provider "aws" {
 
 provider "cloudflare" {}
 
+locals {
+  final_domain = "${var.prefix}.${var.site_domain}"
+}
+
 resource "aws_s3_bucket" "site" {
-  bucket = var.site_domain
+  bucket = local.final_domain
   acl    = "public-read"
 
   website {
     index_document = "index.html"
     error_document = "index.html"
-  }
-}
-
-resource "aws_s3_bucket" "www" {
-  bucket = "www.${var.site_domain}"
-  acl    = "private"
-  policy = ""
-
-  website {
-    redirect_all_requests_to = "https://${var.site_domain}"
   }
 }
 
@@ -51,18 +45,8 @@ data "cloudflare_zones" "domain" {
 
 resource "cloudflare_record" "site_cname" {
   zone_id = data.cloudflare_zones.domain.zones[0].id
-  name    = var.site_domain
+  name    = local.final_domain
   value   = aws_s3_bucket.site.website_endpoint
-  type    = "CNAME"
-
-  ttl     = 1
-  proxied = true
-}
-
-resource "cloudflare_record" "www" {
-  zone_id = data.cloudflare_zones.domain.zones[0].id
-  name    = "www"
-  value   = var.site_domain
   type    = "CNAME"
 
   ttl     = 1
